@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+venv/
+.env
+
+# Airflow
+logs/
+*.log
+*.db
+*.sql
+airflow.cfg
+unittests/
+
+# Docker
+**/docker-compose.override.yml
+**/docker-compose.override.yaml
+**/.env
+*.tar
+*.tmp
+
+# VS Code
+.vscode/
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local data and temp
+data/bronze/
+__pycache__/
+
+# Editor backup files
+*~
+*.swp
+*.swo
