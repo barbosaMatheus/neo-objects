@@ -46,12 +46,17 @@ The pipeline implements a **medallion architecture** with four layers:
 
 ## Setup and Installation
 
-1. **Clone or navigate to the project directory**:
+1. **Clone the project directory**:
+   ```bash
+   git clone https://github.com/barbosaMatheus/neo-objects.git
+   ```
+
+2. **Navigate to the repo directory**:
    ```bash
    cd neo-objects
    ```
 
-2. **Build and start the services**:
+3. **Build and start the services**:
    ```bash
    docker compose up --build
    ```
@@ -61,7 +66,7 @@ The pipeline implements a **medallion architecture** with four layers:
    - Start Redis for Celery
    - Start Airflow services (webserver, scheduler, worker)
 
-3. **Wait for services to be healthy**:
+4. **Wait for services to be healthy**:
    - The initial build may take 5-10 minutes
    - Check logs for "healthy" status messages
 
@@ -96,7 +101,7 @@ DAGs should be run in the following order to maintain data dependencies:
 
 To run a DAG:
 1. In Airflow UI, find the DAG in the list
-2. Click the play button (▶️) to trigger it
+2. Click the play button to trigger it
 3. Monitor progress in the Graph View and Logs
 
 ### Database Inspection
