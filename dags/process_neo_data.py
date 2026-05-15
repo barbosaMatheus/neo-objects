@@ -158,7 +158,7 @@ def exctract_silver() -> None:
 
 def create_asteroid_dimension_table() -> None:
     hook = PostgresHook(postgres_conn_id="neo_db")
-    hook.run('DROP TABLE IF EXISTS "asteroid_dimension";')
+    hook.run('DROP TABLE IF EXISTS "asteroid_dimension" CASCADE;')
     hook.run("""
         CREATE TABLE IF NOT EXISTS "asteroid_dimension" AS
         SELECT DISTINCT asteroid_id, asteroid_name, luminosity_abs_mag, is_asteroid_hazardous
@@ -172,7 +172,7 @@ def create_asteroid_dimension_table() -> None:
 
 def create_observations_fact_table() -> None:
     hook = PostgresHook(postgres_conn_id="neo_db")
-    hook.run('DROP TABLE IF EXISTS "observations_fact";')
+    hook.run('DROP TABLE IF EXISTS "observations_fact" CASCADE;')
     hook.run("""
         CREATE TABLE IF NOT EXISTS "observations_fact" AS
         SELECT observation_id, asteroid_id, est_diameter_min, est_diameter_max, relative_velocity, miss_distance
@@ -204,12 +204,12 @@ def create_neo_gold_ml() -> None:
             max(relative_velocity) as max_relative_velocity,
             avg(relative_velocity) as avg_relative_velocity,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY relative_velocity) as median_relative_velocity,
-            stddev_samp(relative_velocity) as stddev_relative_velocity,
+            coalesce(stddev_samp(relative_velocity), 0) as stddev_relative_velocity,
             min(miss_distance) as min_miss_distance,
             max(miss_distance) as max_miss_distance,
             avg(miss_distance) as avg_miss_distance,
             percentile_cont(0.5) WITHIN GROUP (ORDER BY miss_distance) as median_miss_distance,
-            stddev_samp(miss_distance) as stddev_miss_distance,
+            coalesce(stddev_samp(miss_distance), 0) as stddev_miss_distance,
             avg(luminosity_abs_mag) as avg_luminosity_abs_mag,
             cast(is_asteroid_hazardous as int) as is_asteroid_hazardous
         FROM "staging_neo_gold"
@@ -229,7 +229,7 @@ def cleanup_gold_staging() -> None:
 
 with DAG(
     dag_id="neo_silver_to_gold",
-    start_date=datetime(2026, 5, 10),
+    start_date=datetime(2026, 5, 11),
     catchup=False,
     default_args={
         "owner": "airflow",

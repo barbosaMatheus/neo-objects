@@ -28,7 +28,13 @@ The pipeline implements a **medallion architecture** with four layers:
 - **Source**: Gold table
 - **Transformations**: Feature engineering, statistical aggregations per asteroid
 - **Purpose**: Machine learning-ready dataset with descriptive statistics
-- **Table**: `ml_gold_neo` in PostgreSQL
+- **Table**: `neo_gold_ml` in PostgreSQL
+
+### Model Training and Analysis
+- **Source**: ML Gold table
+- **Transformations**: Model training, hyperparameter search, feature importance analysis
+- **Purpose**: Persist model metrics and analysis results for evaluation
+- **Table**: `model_analysis` in PostgreSQL
 
 ## Technologies Used
 
@@ -83,26 +89,27 @@ The pipeline implements a **medallion architecture** with four layers:
 
 DAGs should be run in the following order to maintain data dependencies:
 
-1. **neo_medallion_pipeline** (Bronze Layer)
+1. **neo_csv_to_bronze** (Bronze Layer)
    - Processes raw CSV → Parquet → PostgreSQL bronze table
    - Run this first to establish the base data
 
-2. **neo_silver_pipeline** (Silver Layer) *[Planned]*
+2. **neo_bronze_to_silver** (Silver Layer)
    - Transforms bronze data into cleaned silver table
    - Run after bronze is complete
 
-3. **neo_gold_pipeline** (Gold Layer) *[Planned]*
+3. **neo_silver_to_gold** (Gold Layer)
    - Creates business-ready gold table from silver
    - Run after silver is complete
 
-4. **neo_ml_gold_pipeline** (ML Gold Layer) *[Planned]*
-   - Generates ML-ready features with aggregations
-   - Run after gold is complete
+4. **neo_model_training** (Model Training)
+   - Trains the classification model on ML-ready features
+   - Writes model metrics and feature importances to `model_analysis`
+   - Run after the ML Gold layer is complete
 
-To run a DAG:
-1. In Airflow UI, find the DAG in the list
+Alternatively, use the orchestration DAG **run_all_pipelines** to execute all steps in sequence automatically:
+1. In Airflow UI, find the `run_all_pipelines` DAG
 2. Click the play button to trigger it
-3. Monitor progress in the Graph View and Logs
+3. Monitor progress in the Graph View and Logs of the orchestrator and downstream DAGs
 
 ### Database Inspection
 
@@ -133,18 +140,23 @@ SELECT * FROM silver_neo LIMIT 10;
 \d gold_neo
 SELECT * FROM gold_neo LIMIT 10;
 
--- View ML gold table (when implemented)
-\d ml_gold_neo
-SELECT * FROM ml_gold_neo LIMIT 10;
+-- View ML gold table
+\d neo_gold_ml
+SELECT * FROM neo_gold_ml LIMIT 10;
+
+-- View model analysis results
+\d model_analysis
+SELECT id, best_params, best_score, accuracy, feature_importances, created_at
+FROM model_analysis
+ORDER BY created_at DESC
+LIMIT 10;
 
 -- Count records in each layer
 SELECT 'bronze' as layer, COUNT(*) as records FROM bronze_neo
 UNION ALL
 SELECT 'silver', COUNT(*) FROM silver_neo
 UNION ALL
-SELECT 'gold', COUNT(*) FROM gold_neo
-UNION ALL
-SELECT 'ml_gold', COUNT(*) FROM ml_gold_neo;
+SELECT 'ml_gold', COUNT(*) FROM neo_gold_ml;
 ```
 
 ## Data Flow
@@ -168,7 +180,6 @@ Each layer builds upon the previous, ensuring data quality increases while maint
 - Add data quality checks and monitoring
 - Implement incremental loading with upsert logic
 - Add automated testing for DAGs
-- Create dashboard visualizations for the processed data
 
 ## License
 
