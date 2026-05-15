@@ -304,6 +304,31 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  superset:
+    build:
+      context: .
+      dockerfile: Dockerfile.superset
+    environment:
+      SUPERSET_ENV: production
+      SUPERSET_HOME: /app/superset_home
+      SUPERSET_CONFIG_PATH: /app/superset_config.py
+    ports:
+      - "8088:8088"
+    depends_on:
+      - neo-db
+    restart: always
+    volumes:
+      - superset_home:/app/superset_home
+      - ./superset_config.py:/app/superset_config.py:ro
+    command:
+      - superset
+      - run
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8088"
+
 volumes:
   postgres-db-volume:
   neo-db-volume:
+  superset_home:

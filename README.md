@@ -71,6 +71,7 @@ The pipeline implements a **medallion architecture** with four layers:
    - Start PostgreSQL databases (Airflow metadata and neo-db)
    - Start Redis for Celery
    - Start Airflow services (webserver, scheduler, worker)
+   - Start Superset for dashboarding
 
 4. **Wait for services to be healthy**:
    - The initial build may take 5-10 minutes
@@ -84,6 +85,18 @@ The pipeline implements a **medallion architecture** with four layers:
 2. Login with:
    - Username: `airflow`
    - Password: `airflow`
+
+### Accessing Superset
+
+1. Open your browser and navigate to: `http://localhost:8088`
+2. The Superset UI will start once the Superset service is healthy.
+3. On first run, initialize Superset with the following commands:
+   ```bash
+   docker compose exec superset superset db upgrade
+   docker compose exec superset superset fab create-admin \
+     --username admin --firstname Superset --lastname Admin --email admin@example.com --password admin
+   docker compose exec superset superset init
+   ```
 
 ### Running the DAGs
 
@@ -176,7 +189,6 @@ Each layer builds upon the previous, ensuring data quality increases while maint
 
 ## Future Enhancements
 
-- Implement silver, gold, and ML gold DAGs
 - Add data quality checks and monitoring
 - Implement incremental loading with upsert logic
 - Add automated testing for DAGs
