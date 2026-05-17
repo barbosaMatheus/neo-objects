@@ -182,6 +182,19 @@ The pipeline implements a **medallion architecture** with four layers:
 - Implement incremental loading with upsert logic
 - Add automated testing for DAGs
 
+## Optional Frontend Dashboard
+
+A simple React dashboard has been added in `frontend/` to display:
+- model performance metrics in a table
+- feature importances in a bar chart
+- dynamic feature selection for the chart
+
+To run the frontend in Docker alongside the database:
+1. `docker compose up --build frontend`
+2. Open `http://localhost:4173`
+
+The frontend service is built from the top-level `Dockerfile` using a dedicated `frontend` stage, and it queries the `neo-db` container for the latest `model_analysis` row.
+
 ## License
 
 This project is for educational and portfolio purposes.
