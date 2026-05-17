@@ -111,7 +111,7 @@ function App() {
         <div className="chart-header">
           <div>
             <h2>Feature Importances</h2>
-            <p>Select the features you want to visualize.</p>
+            <p>Select the features you want to visualize. Each score represents the importance of the feature in determining the harmfulnees of a NEO object.</p>
           </div>
           <div className="feature-selector">
             {availableFeatures.map((feature) => (

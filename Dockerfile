@@ -1,9 +1,3 @@
-FROM docker.io/apache/airflow:2.9.3 AS airflow-base
-
-COPY requirements.txt /requirements.txt
-COPY data/neo.csv /opt/airflow/data/neo.csv
-ENV _PIP_ADDITIONAL_REQUIREMENTS="-r /requirements.txt"
-
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json* ./
@@ -20,4 +14,8 @@ COPY frontend/server.js ./
 EXPOSE 4173
 CMD ["node", "server.js"]
 
-FROM airflow-base
+FROM docker.io/apache/airflow:2.9.3 AS airflow-base
+
+COPY requirements.txt .
+COPY data/neo.csv .
+RUN pip install -r requirements.txt

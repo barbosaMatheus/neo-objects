@@ -1,0 +1,1 @@
+declare module '*.css';  // this clears an error when importing CSS files
