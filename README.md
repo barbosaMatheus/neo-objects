@@ -2,48 +2,6 @@
 
 A portfolio project demonstrating a modern data engineering pipeline using Apache Airflow, PostgreSQL, and Docker. This pipeline processes Near-Earth Object (NEO) asteroid data through a medallion architecture, transforming raw CSV data into increasingly refined layers suitable for analytics and machine learning. The final goal is to model the harmfulness of each object and analyze the parameters that most influence the harmfulness of an asteroid.
 
-## Architecture
-
-The pipeline implements a **medallion architecture** with four layers:
-
-### Bronze Layer
-- **Source**: Raw `neo.csv` file
-- **Format**: Parquet files for efficient storage and querying
-- **Purpose**: Immutable raw data landing zone
-- **Table**: `bronze_neo` in PostgreSQL
-
-### Silver Layer
-- **Source**: Bronze parquet files
-- **Transformations**: Data cleaning, type standardization, deduplication
-- **Purpose**: Curated, cleaned data
-- **Table**: `silver_neo` in PostgreSQL
-
-### Gold Layer
-- **Source**: Silver table
-- **Transformations**: Business logic, aggregations, enrichment
-- **Purpose**: Business-ready analytics data
-- **Table**: `gold_neo` in PostgreSQL
-
-### ML Gold Layer
-- **Source**: Gold table
-- **Transformations**: Feature engineering, statistical aggregations per asteroid
-- **Purpose**: Machine learning-ready dataset with descriptive statistics
-- **Table**: `neo_gold_ml` in PostgreSQL
-
-### Model Training and Analysis
-- **Source**: ML Gold table
-- **Transformations**: Model training, hyperparameter search, feature importance analysis
-- **Purpose**: Persist model metrics and analysis results for evaluation
-- **Table**: `model_analysis` in PostgreSQL
-
-## Technologies Used
-
-- **Apache Airflow**: Workflow orchestration and scheduling
-- **PostgreSQL**: Data storage and SQL transformations
-- **Docker & Docker Compose**: Containerized deployment
-- **Python**: Data processing with Pandas and PyArrow
-- **Parquet**: Efficient columnar storage format
-
 ## Prerequisites
 
 - Docker and Docker Compose installed
@@ -166,6 +124,49 @@ neo.csv → Bronze (Parquet + Postgres) → Silver (Cleaned) → Gold (Enriched)
 ```
 
 Each layer builds upon the previous, ensuring data quality increases while maintaining auditability.
+
+## Architecture
+
+The pipeline implements a **medallion architecture** with four layers:
+
+### Bronze Layer
+- **Source**: Raw `neo.csv` file
+- **Format**: Parquet files for efficient storage and querying
+- **Purpose**: Immutable raw data landing zone
+- **Table**: `bronze_neo` in PostgreSQL
+
+### Silver Layer
+- **Source**: Bronze parquet files
+- **Transformations**: Data cleaning, type standardization, deduplication
+- **Purpose**: Curated, cleaned data
+- **Table**: `silver_neo` in PostgreSQL
+
+### Gold Layer
+- **Source**: Silver table
+- **Transformations**: Business logic, aggregations, enrichment
+- **Purpose**: Business-ready analytics data
+- **Table**: `gold_neo` in PostgreSQL
+
+### ML Gold Layer
+- **Source**: Gold table
+- **Transformations**: Feature engineering, statistical aggregations per asteroid
+- **Purpose**: Machine learning-ready dataset with descriptive statistics
+- **Table**: `neo_gold_ml` in PostgreSQL
+
+### Model Training and Analysis
+- **Source**: ML Gold table
+- **Transformations**: Model training, hyperparameter search, feature importance analysis
+- **Purpose**: Persist model metrics and analysis results for evaluation
+- **Table**: `model_analysis` in PostgreSQL
+
+## Technologies Used
+
+- **Apache Airflow**: Workflow orchestration and scheduling
+- **PostgreSQL**: Data storage and SQL transformations
+- **Docker & Docker Compose**: Containerized deployment
+- **Python**: Data processing with Pandas and PyArrow
+- **Parquet**: Efficient columnar storage format
+
 
 ## Development Notes
 
