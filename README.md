@@ -1,6 +1,6 @@
-# NEO Asteroid Data Pipeline
+# Determining Near-Earth Orbit Object Harmfulness
 
-A portfolio project demonstrating a modern data engineering pipeline using Apache Airflow, PostgreSQL, and Docker. This pipeline processes Near-Earth Object (NEO) asteroid data through a medallion architecture, transforming raw CSV data into increasingly refined layers suitable for analytics and machine learning.
+A portfolio project demonstrating a modern data engineering pipeline using Apache Airflow, PostgreSQL, and Docker. This pipeline processes Near-Earth Object (NEO) asteroid data through a medallion architecture, transforming raw CSV data into increasingly refined layers suitable for analytics and machine learning. The final goal is to model the harmfulness of each object and analyze the parameters that most influence the harmfulness of an asteroid.
 
 ## Architecture
 
