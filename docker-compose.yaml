@@ -49,7 +49,7 @@ x-airflow-common:
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.9.3}
+  image: ${AIRFLOW_IMAGE_NAME:-neo-objects-airflow:latest}
   build: .
   environment:
     &airflow-common-env
@@ -207,14 +207,14 @@ services:
 
   airflow-init:
     <<: *airflow-common
-    entrypoint: /bin/bash
+    entrypoint: /bin/sh
     # yamllint disable rule:line-length
     command:
       - -c
       - |
-        if [[ -z "${AIRFLOW_UID}" ]]; then
+        if [ -z "${AIRFLOW_UID}" ]; then
           echo
-          echo -e "\033[1;33mWARNING!!!: AIRFLOW_UID not set!\e[0m"
+          printf "\033[1;33mWARNING!!!: AIRFLOW_UID not set!\e[0m\n"
           echo "If you are on Linux, you SHOULD follow the instructions below to set "
           echo "AIRFLOW_UID environment variable, otherwise files will be owned by root."
           echo "For other operating systems you can get rid of the warning with manually created .env file:"
@@ -226,36 +226,36 @@ services:
         cpus_available=$$(grep -cE 'cpu[0-9]+' /proc/stat)
         disk_available=$$(df / | tail -1 | awk '{print $$4}')
         warning_resources="false"
-        if (( mem_available < 4000 )) ; then
+        if [ "$${mem_available}" -lt 4000 ]; then
           echo
-          echo -e "\033[1;33mWARNING!!!: Not enough memory available for Docker.\e[0m"
+          printf "\033[1;33mWARNING!!!: Not enough memory available for Docker.\e[0m\n"
           echo "At least 4GB of memory required. You have $$(numfmt --to iec $$((mem_available * one_meg)))"
           echo
           warning_resources="true"
         fi
-        if (( cpus_available < 2 )); then
+        if [ "$${cpus_available}" -lt 2 ]; then
           echo
-          echo -e "\033[1;33mWARNING!!!: Not enough CPUS available for Docker.\e[0m"
+          printf "\033[1;33mWARNING!!!: Not enough CPUS available for Docker.\e[0m\n"
           echo "At least 2 CPUs recommended. You have $${cpus_available}"
           echo
           warning_resources="true"
         fi
-        if (( disk_available < one_meg * 10 )); then
+        if [ "$${disk_available}" -lt $$(($${one_meg} * 10)) ]; then
           echo
-          echo -e "\033[1;33mWARNING!!!: Not enough Disk space available for Docker.\e[0m"
-          echo "At least 10 GBs recommended. You have $$(numfmt --to iec $$((disk_available * 1024 )))"
+          printf "\033[1;33mWARNING!!!: Not enough Disk space available for Docker.\e[0m\n"
+          echo "At least 10 GBs recommended. You have $$(numfmt --to iec $$((disk_available * 1024)))"
           echo
           warning_resources="true"
         fi
-        if [[ $${warning_resources} == "true" ]]; then
+        if [ "$${warning_resources}" = "true" ]; then
           echo
-          echo -e "\033[1;33mWARNING!!!: You have not enough resources to run Airflow (see above)!\e[0m"
+          printf "\033[1;33mWARNING!!!: You have not enough resources to run Airflow (see above)!\e[0m\n"
           echo "Please follow the instructions to increase amount of resources available:"
           echo "   https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html#before-you-begin"
           echo
         fi
         mkdir -p /sources/logs /sources/dags /sources/plugins
-        chown -R "${AIRFLOW_UID}:0" /sources/{logs,dags,plugins}
+        chown -R "${AIRFLOW_UID}:0" /sources/logs /sources/dags /sources/plugins
         exec /entrypoint airflow version
     # yamllint enable rule:line-length
     environment:
@@ -278,7 +278,7 @@ services:
       CONNECTION_CHECK_MAX_COUNT: "0"
     # Workaround for entrypoint issue. See: https://github.com/apache/airflow/issues/16252
     command:
-      - bash
+      - sh
       - -c
       - airflow
 
@@ -303,6 +303,24 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend
+    ports:
+      - "4173:4173"
+    environment:
+      PGHOST: neo-db
+      PGUSER: neo
+      PGPASSWORD: neo123
+      PGDATABASE: neo_data
+      PGPORT: "5432"
+    depends_on:
+      neo-db:
+        condition: service_healthy
+    restart: always
 
 volumes:
   postgres-db-volume:
